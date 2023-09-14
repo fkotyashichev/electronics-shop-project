@@ -1,5 +1,6 @@
 import csv
 
+
 class Item:
     """
     Класс для представления товара в магазине.
@@ -26,7 +27,7 @@ class Item:
 
         :return: Общая стоимость товара.
         """
-        return self.price*self.quantity
+        return self.price * self.quantity
 
     def apply_discount(self) -> None:
         """
@@ -34,11 +35,9 @@ class Item:
         """
         self.price = self.price * self.pay_rate
 
-
     @property
     def name(self):
         return self.__name
-
 
     @name.setter
     def name(self, name):
@@ -47,18 +46,23 @@ class Item:
         else:
             self.__name = name
 
-
     @classmethod
     def instantiate_from_csv(cls):
         """Загружает данные из файла csv"""
         cls.all = []
-        with open('/home/fedor/PycharmProjects/electronics-shop-project/src/items.csv', newline='') as f:
-            reader = csv.DictReader(f)
-            for line in reader:
-                name = line['name']
-                price = float(line['price'])
-                quantity = int(line['quantity'])
-                Item(name, price, quantity)
+        try:
+            with open('../src/items.csv', newline='') as f:
+                reader = csv.DictReader(f)
+                for line in reader:
+                    if list(line.keys()) != ['name', 'price', 'quantity']:
+                        raise InstantiateCSVError
+                    else:
+                        name = line['name']
+                        price = float(line['price'])
+                        quantity = int(line['quantity'])
+                        Item(name, price, quantity)
+        except FileNotFoundError:
+            print('Отсутствует файл items.csv')
 
     @staticmethod
     def string_to_number(digit):
@@ -69,6 +73,7 @@ class Item:
             else:
                 break
         return int(numbers)
+
     def __repr__(self):
         return f"Item('{self.name}', {self.price}, {self.quantity})"
 
@@ -79,3 +84,11 @@ class Item:
         if not isinstance(other, Item):
             raise ValueError('Складывать можно только объекты Item и дочерние от них.')
         return self.quantity + other.quantity
+
+
+class InstantiateCSVError(Exception):
+    def __init__(self, *args):
+        print('InstantiateCSVError: Файл items.csv поврежден')
+
+    def __str__(self):
+        return 'InstantiateCSVError: Файл items.csv поврежден'
